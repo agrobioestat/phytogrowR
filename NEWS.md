@@ -1,5 +1,27 @@
 # phytogrowR 0.1.1
 
+- Adds `growth_curve_params()`, which extracts the landmarks an experiment is
+  usually designed to estimate from a fitted curve: asymptote, inflection point,
+  maximum absolute and relative growth rates and when they occur, the times to
+  10/50/90% of the asymptote, and the duration of the active phase. It reports
+  whether the asymptote comes from a model parameter or is merely the highest
+  fitted value, and flags `plateau_reached = FALSE` when the curve was still
+  rising at the last harvest.
+- Adds `compare_growth_models()`, which fits `exponential`, `logistic`,
+  `gompertz`, `richards` and polynomial candidates to the same data and ranks
+  them by AIC, BIC or RMSE, so the functional form tested by
+  `compare_growth_curves()` is chosen from the data. Candidates that fail to
+  converge are reported rather than dropped.
+- Adds `thermal_time()`, converting a daily temperature series into growing
+  degree days (`simple`, `cutoff` and `modified` methods, optional upper
+  threshold, per-group accumulation and a sowing/emergence `origin`), so growth
+  analysis can be run against thermal units instead of calendar days.
+- Fixes `prepare_growth_data(mapping = )`, which renamed columns in the wrong
+  direction. The mapping only ever worked on data that already used the
+  standard names, that is, exactly when it was not needed; any real mapping
+  such as `list(time = "dias")` failed with "Column `time` doesn't exist".
+- Adds "Curve landmarks" and model-selection panels to the Shiny app, plus CSV
+  export for both.
 - Adds `compare_growth_curves()`, a formal test of coincidence of growth curves
   between treatments based on nested models. It reports the F test for nested
   models (Chow, 1960; Graybill, 1976) and the likelihood ratio test, decomposes

@@ -137,6 +137,37 @@ For the non-linear families the output additionally reports one
 hypothesis per parameter, which says *why* the curves differ: final size
 (`Asym`), timing (`xmid`, `b`) or rate (`scal`, `c`, `k`, `r`).
 
+## Describing and choosing the curve
+
+``` r
+fit <- fit_growth_curve(dat, response = "total_biomass_g",
+                        group_cols = "treatment", method = "logistic")
+
+# When did growth peak, how fast, and for how long?
+growth_curve_params(fit)
+
+# Which functional form does the data actually support?
+compare_growth_models(dat, response = "total_biomass_g", group_var = "treatment")
+```
+
+`growth_curve_params()` reports whether `asymptote` is a fitted model
+parameter or just the highest fitted value, and sets
+`plateau_reached = FALSE` when the curve was still rising at the last
+harvest, so a final size is never implied where the experiment did not
+observe one.
+
+## Thermal time
+
+Growth analysis on calendar days assumes a day in a cool week is worth
+as much as a day in a warm one. `thermal_time()` accumulates growing
+degree days so `time` can be expressed in thermal units instead:
+
+``` r
+tt <- thermal_time(weather, date = date, tmin = tmin, tmax = tmax, t_base = 10)
+growth <- merge(growth, tt[, c("date", "thermal_time")], by = "date")
+dat <- prepare_growth_data(growth, mapping = list(time = "thermal_time"))
+```
+
 ## Interactive app
 
 ``` r
@@ -162,6 +193,11 @@ subset.
 - `compare_growth_curves()` (formal test of coincidence of curves
   between treatments: F test for nested models and likelihood ratio
   test)
+- `compare_growth_models()` (rank candidate functional forms by
+  AIC/BIC/RMSE)
+- `growth_curve_params()` (inflection point, maximum rates, active
+  phase)
+- `thermal_time()` (growing degree days)
 - `biomass_partition()`
 - `calc_root_shoot_allometry()`
 - `plot_growth_curve()`

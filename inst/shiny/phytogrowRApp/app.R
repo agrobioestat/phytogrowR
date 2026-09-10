@@ -573,6 +573,18 @@ ui <- bslib::page_sidebar(
         bslib::card_body(plotOutput("curve_plot", height = "100%"))
       ),
       bslib::card(
+        bslib::card_header("Curve landmarks"),
+        bslib::card_body(
+          div(
+            class = "pg-hint",
+            "When growth peaked, how fast it was then, and how long the active",
+            "phase lasted. Read the asymptote as a lower bound whenever",
+            "plateau_reached is FALSE: the curve was still rising at the last harvest."
+          ),
+          DTOutput("curve_params_tbl")
+        )
+      ),
+      bslib::card(
         bslib::card_header("Fit messages"),
         DTOutput("curve_messages")
       )
@@ -643,6 +655,18 @@ ui <- bslib::page_sidebar(
         bslib::card_body(plotOutput("cc_plot", height = "100%"))
       ),
       bslib::card(
+        bslib::card_header("Which functional form fits best?"),
+        bslib::card_body(
+          div(
+            class = "pg-hint",
+            "Candidates ranked by AIC within each treatment. A delta below about 2",
+            "means no meaningful distinction, so prefer the simpler or more",
+            "interpretable family. Use this to choose the form tested below."
+          ),
+          DTOutput("model_sel_tbl")
+        )
+      ),
+      bslib::card(
         bslib::card_header("Nested-model tests"),
         DTOutput("cc_tests")
       ),
@@ -671,7 +695,9 @@ ui <- bslib::page_sidebar(
             div(class = "pg-download", downloadButton("download_instant", "Instantaneous rates", class = "btn btn-outline-primary w-100")),
             div(class = "pg-download", downloadButton("download_partition", "Biomass partition", class = "btn btn-outline-primary w-100")),
             div(class = "pg-download", downloadButton("download_compare", "Index comparisons", class = "btn btn-outline-primary w-100")),
-            div(class = "pg-download", downloadButton("download_curve_test", "Curve comparison tests", class = "btn btn-outline-primary w-100"))
+            div(class = "pg-download", downloadButton("download_curve_test", "Curve comparison tests", class = "btn btn-outline-primary w-100")),
+            div(class = "pg-download", downloadButton("download_curve_params", "Curve landmarks", class = "btn btn-outline-primary w-100")),
+            div(class = "pg-download", downloadButton("download_model_sel", "Model selection", class = "btn btn-outline-primary w-100"))
           )
         ),
         bslib::card(
@@ -1006,9 +1032,9 @@ server <- function(input, output, session) {
       )
     }
 
-    # Nine steps; the bootstrap branch of the classical module is by far the
+    # Ten steps; the bootstrap branch of the classical module is by far the
     # slowest, so the user is told which one is running.
-    progress <- shiny::Progress$new(session, min = 0, max = 9)
+    progress <- shiny::Progress$new(session, min = 0, max = 10)
     progress$set(message = "Running analysis", value = 0)
     on.exit(progress$close(), add = TRUE)
 
@@ -1032,6 +1058,8 @@ server <- function(input, output, session) {
         partition = tibble::tibble(), partition_error = err,
         compare = tibble::tibble(), compare_error = err,
         curve_test = NULL, curve_test_error = err,
+        curve_params = NULL, curve_params_error = err,
+        model_sel = NULL, model_sel_error = err,
         status = status_tbl
       ))
     }
@@ -1295,6 +1323,33 @@ server <- function(input, output, session) {
       "total_biomass_g"
     }
 
+    step("curve landmarks and model selection")
+    curve_params <- safe_exec(
+      if (is.null(fit_main)) NULL else growth_curve_params(fit_main)
+    )
+
+    model_sel <- safe_exec(
+      compare_growth_models(
+        data = dat,
+        response = input$response_var %||% "total_biomass_g",
+        time_col = "time",
+        group_var = if ("treatment" %in% names(dat)) "treatment" else NULL,
+        models = c("exponential", "logistic", "gompertz", "richards"),
+        poly_degrees = 1:3
+      )
+    )
+
+    if (!is.null(model_sel$result) && nrow(model_sel$result) > 0) {
+      best <- model_sel$result[model_sel$result$best, , drop = FALSE]
+      add_status(
+        "Model selection", "ok",
+        paste0("Best by AIC: ", paste(unique(best$model), collapse = ", "), ".")
+      )
+    } else {
+      add_status("Model selection", "warning",
+                 model_sel$error %||% "Model selection unavailable.")
+    }
+
     step("curve coincidence test")
     curve_test <- NULL
     curve_test_error <- NULL
@@ -1364,6 +1419,10 @@ server <- function(input, output, session) {
       compare_error = cmp_error,
       curve_test = curve_test,
       curve_test_error = curve_test_error,
+      curve_params = curve_params$result,
+      curve_params_error = curve_params$error,
+      model_sel = model_sel$result,
+      model_sel_error = model_sel$error,
       status = status_tbl
     )
   }, ignoreNULL = FALSE)
@@ -1395,6 +1454,34 @@ server <- function(input, output, session) {
     } else {
       info_table("Curve fitting", "info", "No additional curve messages.")
     }
+  })
+
+  output$curve_params_tbl <- renderDT({
+    req(analysis())
+    p <- analysis()$curve_params
+
+    if (is.null(p) || nrow(p) == 0) {
+      return(info_table(
+        "Curve landmarks", "warning",
+        analysis()$curve_params_error %||% "Landmarks need a curve fit that converged."
+      ))
+    }
+
+    dt_table(p, page_length = 10)
+  })
+
+  output$model_sel_tbl <- renderDT({
+    req(analysis())
+    m <- analysis()$model_sel
+
+    if (is.null(m) || nrow(m) == 0) {
+      return(info_table(
+        "Model selection", "warning",
+        analysis()$model_sel_error %||% "Model selection unavailable."
+      ))
+    }
+
+    dt_table(m, page_length = 12)
   })
 
   output$rates_plot <- renderPlot(res = 96, {
@@ -1701,6 +1788,18 @@ server <- function(input, output, session) {
       }
     },
     function() analysis()$classic_interval_error
+  )
+
+  output$download_curve_params <- csv_handler(
+    "phytogrowR_curve_landmarks.csv",
+    function() analysis()$curve_params,
+    function() analysis()$curve_params_error
+  )
+
+  output$download_model_sel <- csv_handler(
+    "phytogrowR_model_selection.csv",
+    function() analysis()$model_sel,
+    function() analysis()$model_sel_error
   )
 
   output$download_curve_test <- downloadHandler(

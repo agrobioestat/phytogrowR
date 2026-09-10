@@ -46,14 +46,50 @@
 }
 
 .rename_by_mapping <- function(data, mapping) {
-  inverse <- stats::setNames(names(mapping), unlist(mapping))
-  present <- names(inverse)[names(inverse) %in% names(data)]
+  data <- tibble::as_tibble(data)
 
-  if (length(present) == 0) {
-    return(tibble::as_tibble(data))
+  # `mapping` is standard_name -> user column name, and `dplyr::rename()` takes
+  # new = old. The spliced vector therefore needs the STANDARD names as its
+  # names and the user's columns as its values; the reverse silently works for
+  # data that already uses the standard names (every rename is the identity)
+  # and fails for exactly the data the mapping exists to handle.
+  standard <- names(mapping)
+  user_col <- unlist(mapping, use.names = FALSE)
+
+  keep <- !is.na(user_col) &
+    nzchar(user_col) &
+    user_col %in% names(data) &
+    user_col != standard
+
+  if (!any(keep)) {
+    return(data)
   }
 
-  dplyr::rename(tibble::as_tibble(data), !!!inverse[present])
+  standard <- standard[keep]
+  user_col <- user_col[keep]
+
+  if (anyDuplicated(standard) > 0 || anyDuplicated(user_col) > 0) {
+    rlang::abort(
+      "Each column can be mapped only once, and to a single standard name."
+    )
+  }
+
+  # The user said which column holds the standard quantity, so their choice
+  # wins over a same-named column that happens to be in the data. Dropping it
+  # is announced rather than silent.
+  shadowed <- intersect(standard, setdiff(names(data), user_col))
+  if (length(shadowed) > 0) {
+    rlang::warn(
+      paste0(
+        "Column(s) ", paste(shadowed, collapse = ", "),
+        " were dropped because the mapping assigns that name to ",
+        paste(user_col[standard %in% shadowed], collapse = ", "), "."
+      )
+    )
+    data <- data[, setdiff(names(data), shadowed), drop = FALSE]
+  }
+
+  dplyr::rename(data, !!!stats::setNames(user_col, standard))
 }
 
 .coerce_numeric_column <- function(x) {
