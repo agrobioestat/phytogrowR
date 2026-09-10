@@ -7,15 +7,13 @@
 - `R CMD build .`
 - `R CMD check --as-cran phytogrowR_0.1.1.tar.gz`
 
-Result: **0 ERROR | 0 WARNING | 3 NOTE**
+Result: **0 ERROR | 0 WARNING | 2 NOTE**
 
 ## Notes
 
 - New submission.
 - `Skipping checking math rendering: package 'V8' unavailable` (check
   environment only).
-- The `URL` and `BugReports` fields point to the package repository; please
-  let us know if the redirect check flags them.
 
 ## Dependencies
 

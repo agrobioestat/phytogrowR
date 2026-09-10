@@ -281,14 +281,30 @@ fit_growth_curve <- function(
         pred
       )
 
+      # Biomass and leaf area are non-negative by definition, but a smoother
+      # fitted on the identity scale is not constrained to be: penalised
+      # splines in particular can overshoot below zero at the ends of the time
+      # range. Downstream log-based indices (RGR, ULR/NAR) are undefined there,
+      # so the count is carried in the messages table rather than discovered
+      # later as an opaque NaN.
+      n_neg <- sum(pred$fitted <= 0, na.rm = TRUE)
+
       model_list[[idx]] <- fit_res$model
       pred_list[[idx]] <- pred
       msg_list[[idx]] <- dplyr::bind_cols(
         group_ref,
         tibble::tibble(
           status = "ok",
-          message = fit_res$message,
-          n_obs = nrow(gdat)
+          message = if (n_neg > 0) {
+            paste0(
+              "ok; ", n_neg, " fitted value(s) <= 0 (smoother overshoot). ",
+              "Log-based rates are NA at those times."
+            )
+          } else {
+            fit_res$message
+          },
+          n_obs = nrow(gdat),
+          n_negative_fitted = as.integer(n_neg)
         )
       )
     } else {
@@ -309,7 +325,8 @@ fit_growth_curve <- function(
         tibble::tibble(
           status = "failed",
           message = fit_res$message,
-          n_obs = nrow(gdat)
+          n_obs = nrow(gdat),
+          n_negative_fitted = NA_integer_
         )
       )
     }

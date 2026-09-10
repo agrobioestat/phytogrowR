@@ -21,6 +21,14 @@
 - Adds `URL` and `BugReports` to `DESCRIPTION`, removes the invalid `Contact`
   field, and cites Radford (1967) and Poorter & Garnier (1996) alongside
   Hunt et al. (2002).
+- Fixes the opaque "NaNs produced" warning raised when a fitted curve dipped
+  below zero. A positive `epsilon` offsets zeros but cannot rescue negative
+  values, so `.safe_log()` now reports how many values are affected, for which
+  variable, and returns `NA` instead of `NaN`.
+- `fit_growth_curve()` gains an `n_negative_fitted` column in `$messages` and
+  says so in the message text, since a smoother fitted on the identity scale is
+  not constrained to stay non-negative near the boundary of the time range.
+  Log-based rates (RGR, ULR/NAR) are `NA` at those times.
 - Adds a new classical two-harvest module based on Hunt et al. (2002):
   `classical_growth_interval()` with interval-average indices, checks, and CI.
 - Adds classical helper functions:

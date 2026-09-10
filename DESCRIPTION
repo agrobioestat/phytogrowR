@@ -24,8 +24,8 @@ Description: Tools for classical and functional plant growth analysis from
     based on nested models, publication-ready graphics, and an optional 'shiny'
     interface.
 License: MIT + file LICENSE
-URL: https://github.com/Agrobioestat/phytogrowR
-BugReports: https://github.com/Agrobioestat/phytogrowR/issues
+URL: https://github.com/agrobioestat/phytogrowR
+BugReports: https://github.com/agrobioestat/phytogrowR/issues
 Encoding: UTF-8
 Depends: R (>= 4.1)
 Imports:

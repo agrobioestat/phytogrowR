@@ -25,8 +25,8 @@ A modern tool for classical plant growth analysis.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/Agrobioestat/phytogrowR}
-  \item Report bugs at \url{https://github.com/Agrobioestat/phytogrowR/issues}
+  \item \url{https://github.com/agrobioestat/phytogrowR}
+  \item Report bugs at \url{https://github.com/agrobioestat/phytogrowR/issues}
 }
 
 }

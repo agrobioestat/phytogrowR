@@ -149,7 +149,26 @@
     rlang::abort("`epsilon` must be a single positive numeric value.")
   }
 
-  log(x + epsilon)
+  shifted <- x + epsilon
+
+  # `epsilon` rescues ZEROS, not negatives. A smoother is free to overshoot
+  # below zero near the boundary of the time range, and `log()` would then emit
+  # a bare "NaNs produced" warning with no clue about which variable or how
+  # many values. Report it once, with context, and return NA there.
+  bad <- !is.na(shifted) & shifted <= 0
+  if (any(bad)) {
+    rlang::warn(
+      paste0(
+        sum(bad), " value(s) of `", name, "` are still <= 0 after adding `epsilon` (most negative: ",
+        format(min(shifted[bad]), digits = 3), "); the logarithm is NA there. ",
+        "A fitted curve dipping below zero is the usual cause."
+      ),
+      class = "phytogrowR_nonpositive_log"
+    )
+    shifted[bad] <- NA_real_
+  }
+
+  log(shifted)
 }
 
 .safe_div <- function(num, den) {
