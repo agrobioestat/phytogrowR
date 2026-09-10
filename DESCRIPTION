@@ -1,0 +1,57 @@
+Package: phytogrowR
+Type: Package
+Title: Modern Growth Analysis for Plant Biomass and Leaf Area Data
+Version: 0.1.1
+Authors@R: c(
+    person(given = "Joao Everthon da Silva",
+           family = "Ribeiro",
+           role = c("aut", "cre"),
+           email = "everthonribeiro10@gmail.com")
+  )
+Description: Tools for classical and functional plant growth analysis from
+    sequential and destructive harvests, repeated measurements, and time series
+    of biomass and leaf area. Estimates relative growth rate, absolute growth
+    rate, unit leaf rate (also known as net assimilation rate), leaf area ratio,
+    specific leaf area, leaf weight fraction, crop growth rate, biomass
+    partitioning, root-shoot ratios, and root-shoot allometric coefficients.
+    Interval formulae and their assumptions follow Radford (1967)
+    <doi:10.2135/cropsci1967.0011183X000700030001x>, the computational and
+    design recommendations of Poorter and Garnier (1996)
+    <doi:10.1093/jxb/47.9.1343>, and the classical implementation of Hunt,
+    Causton, Shipley and Askew (2002) <doi:10.1093/aob/mcf214>. Functional
+    approaches include curve fitting, numerical derivatives, bootstrap
+    confidence intervals, formal tests of curve coincidence between treatments
+    based on nested models, publication-ready graphics, and an optional 'shiny'
+    interface.
+License: MIT + file LICENSE
+URL: https://github.com/Agrobioestat/phytogrowR
+BugReports: https://github.com/Agrobioestat/phytogrowR/issues
+Encoding: UTF-8
+Depends: R (>= 4.1)
+Imports:
+    stats,
+    utils,
+    graphics,
+    dplyr,
+    generics,
+    ggplot2,
+    mgcv,
+    rlang,
+    tibble,
+    tidyr
+Suggests:
+    DT,
+    broom,
+    bslib,
+    knitr,
+    readr,
+    rmarkdown,
+    shiny,
+    testthat (>= 3.0.0),
+    withr
+VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Config/testthat/edition: 3
+ByteCompile: true
+NeedsCompilation: no

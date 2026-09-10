@@ -1,0 +1,78 @@
+---
+title: "Using the Shiny App"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using the Shiny App}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+## Launch the App
+
+The app depends on packages listed in `Suggests`, so install them once before
+the first launch:
+
+```r
+install.packages(c("shiny", "DT", "readr"))
+phytogrowR::run_phytogrow_app()
+```
+
+`run_phytogrow_app()` checks for those packages first and, if any is missing,
+stops with the exact `install.packages()` call you need instead of failing
+inside the app.
+
+## Expected Spreadsheet Structure
+
+The app can auto-map common columns such as:
+
+- `time` or date;
+- `total_biomass_g`;
+- `leaf_area_cm2`;
+- `leaf_biomass_g`, `stem_biomass_g`, `root_biomass_g`;
+- `treatment`, `genotype`, `block`, `plot_id`, `plant_id`.
+
+## Main Workflow in the App
+
+1. Upload CSV or choose the built-in example.
+2. If using examples, pick the profile that matches your current function test:
+   wide repeated data, destructive harvest means, long table auto-conversion, or quick subset.
+3. Confirm column mapping.
+4. Select curve method and response variable.
+5. Optionally configure the **Formal curve comparison** block: grouping
+   variable, response, functional form (`poly`, `exponential`, `logistic`,
+   `gompertz`, `richards`), log scale, test statistic, and pairwise contrasts.
+6. Click **Run Analysis**.
+7. Review tabs: Data, Status & checks, Curves, Rates, Classical analysis,
+   Partition, Comparisons, Curve comparison.
+8. Export CSV tables and report (HTML/Word/PDF).
+
+## Curve Comparison Tab
+
+This tab answers "do the treatments follow the same growth curve?" with the
+nested-model machinery of `compare_growth_curves()`. It shows:
+
+- a plain-language verdict with the F and/or likelihood ratio statistics;
+- a plot overlaying the treatment-specific curves and the single common curve
+  implied by the null hypothesis;
+- the nested-model table (global `coincidence` plus the `level`/`shape` or
+  parameter-wise decomposition);
+- pairwise coincidence tests with adjusted p-values;
+- the per-treatment parameter estimates.
+
+Report rendering additionally needs `rmarkdown` and `knitr`
+(`install.packages(c("rmarkdown", "knitr"))`), plus a LaTeX installation for
+PDF output.
+
+## Report Export
+
+The app report includes:
+
+- data summary and quality checks;
+- fitted trajectories and rates;
+- treatment comparison tables;
+- biomass partition summaries;
+- short methodological notes.

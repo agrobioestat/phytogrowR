@@ -1,0 +1,62 @@
+---
+title: "Getting Started with phytogrowR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with phytogrowR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(phytogrowR)
+library(dplyr)
+```
+
+## Installation
+
+```r
+# install.packages("remotes")
+# remotes::install_local(".")
+```
+
+## Load Example Data
+
+```{r}
+head(growth_wide_example)
+```
+
+## Prepare and Check Data
+
+```{r}
+dat <- prepare_growth_data(growth_wide_example)
+qc <- check_growth_data(dat)
+qc
+```
+
+## Classical Growth Indices
+
+```{r}
+classic <- calc_classic_growth(
+  dat,
+  group_cols = c("treatment", "plot_id", "plant_id"),
+  epsilon = 1e-6
+)
+classic %>%
+  group_by(treatment) %>%
+  summarise(across(c(rgr, agr, nar, algr, rlgr, lar, lai, sla, cgr), mean, na.rm = TRUE), .groups = "drop")
+```
+
+## Basic Plots
+
+```{r}
+fit <- fit_growth_curve(dat, response = "total_biomass_g", group_cols = "treatment", method = "gam")
+plot_growth_curve(fit)
+plot_growth_rates(classic, type = "classic", metrics = c("rgr", "agr", "rlgr", "algr"))
+```
+
+## Classical References
+
+- Hunt, R. (1990). *Basic Growth Analysis*.
+- Benincasa, M. M. P. (2003). *Plant Growth Analysis: Basic Concepts*.
+

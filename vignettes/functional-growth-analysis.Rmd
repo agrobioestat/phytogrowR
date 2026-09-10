@@ -1,0 +1,129 @@
+---
+title: "Functional Growth Analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Functional Growth Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(phytogrowR)
+library(dplyr)
+```
+
+## Why Functional Growth Analysis?
+
+Classical metrics are interval means. Functional methods estimate smooth trajectories and derive instantaneous rates from derivatives.
+
+## Fit Curves
+
+```{r}
+dat <- prepare_growth_data(growth_wide_example)
+fit_w <- fit_growth_curve(dat, response = "total_biomass_g", group_cols = c("treatment"), method = "gam")
+fit_la <- fit_growth_curve(dat, response = "leaf_area_cm2", group_cols = c("treatment"), method = "gam")
+
+summary(fit_w)
+plot_growth_curve(fit_w)
+```
+
+## Instantaneous Rates
+
+```{r}
+inst <- calc_instant_rates(fit_w, leaf_area_fit = fit_la, epsilon = 1e-6)
+head(inst)
+plot_growth_rates(inst, type = "instantaneous", metrics = c("agr_inst", "rgr_inst", "algr_inst", "rlgr_inst", "nar_inst"))
+```
+
+## Compare Treatments
+
+```{r}
+cmp_rgr <- compare_growth(dat, metric = "rgr", group_var = "treatment", epsilon = 1e-6)
+cmp_rgr
+
+boot_rgr <- bootstrap_growth(dat, metric = "rgr", group_var = "treatment", times = 100, seed = 2026, epsilon = 1e-6)
+boot_rgr
+```
+
+## Formal Test of Coincidence of Curves
+
+`compare_growth()` contrasts one index at a time. When the question is whether
+the treatments follow *the same growth trajectory*, the comparison should be
+made between whole curves, and that is a nested-model problem:
+
+* **H0 (reduced model)** — one single curve describes every treatment, so the
+  parameter vector is shared: \(p_0 = p\) parameters.
+* **H1 (full model)** — every treatment keeps its own parameter vector:
+  \(p_1 = k\,p\) parameters.
+
+`compare_growth_curves()` fits both models and compares them with the F test
+for nested models and with the likelihood ratio test:
+
+\[
+F = \frac{(RSS_0 - RSS_1)/(p_1 - p_0)}{RSS_1/(n - p_1)},
+\qquad
+G = n \log\!\left(\frac{RSS_0}{RSS_1}\right) \sim \chi^2_{p_1 - p_0}.
+\]
+
+Using `degree = 2` on the log scale is the classical log-quadratic functional
+growth analysis, where the first derivative of the fitted curve is the relative
+growth rate:
+
+```{r}
+ct <- compare_growth_curves(
+  dat,
+  response = "total_biomass_g",
+  group_var = "treatment",
+  model = "poly",
+  degree = 2,
+  log_response = TRUE,
+  epsilon = 1e-6,
+  pairwise = TRUE
+)
+
+ct
+```
+
+The `plot()` method makes the quantity being tested visible: the coloured lines
+are the treatment-specific curves and the dashed black line is the single common
+curve imposed by H0.
+
+```{r}
+plot(ct)
+```
+
+Besides the global `coincidence` hypothesis, the polynomial route splits the
+difference into `level` (equal intercepts given a common shape) and `shape`
+(parallel curves). The non-linear families instead report one hypothesis per
+parameter, which tells you *why* the curves differ:
+
+```{r}
+nl <- compare_growth_curves(
+  dat,
+  response = "total_biomass_g",
+  group_var = "treatment",
+  model = "logistic"
+)
+
+tidy(nl)
+```
+
+A significant `Asym` row points to different final sizes, `xmid`/`b` to
+different timing, and `scal`/`c`/`k`/`r` to different rates. Because a single
+residual variance is assumed for all treatments, check the residuals before
+trusting a borderline p-value; heteroscedastic biomass data usually calls for
+`log_response = TRUE`.
+
+## Agronomic Interpretation
+
+- `AGR` and `CGR` describe absolute biomass accumulation speed.
+- `RGR` and `NAR` help interpret physiological efficiency through time.
+- Partition metrics highlight allocation shifts under stress versus nutrient supply.
+- `ALGR`, `RLGR`, and `LAI` strengthen interpretation of canopy expansion dynamics.
+
+## Classical References
+
+- Hunt, R. (1990). *Basic Growth Analysis*.
+- Benincasa, M. M. P. (2003). *Plant Growth Analysis: Basic Concepts*.
+

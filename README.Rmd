@@ -1,0 +1,62 @@
+---
+output: github_document
+---
+
+# phytogrowR
+
+> **Phyto** + **Grow** + **R**  
+> *Modern plant growth analysis for longitudinal and harvest data.*
+
+`phytogrowR` is an R package focused on modern growth analysis in plant physiology and agronomic experiments. It supports repeated measurements, destructive sequential harvests, smooth growth modeling, derivative-based rates, bootstrap uncertainty, treatment comparison, biomass partitioning, automatic reports, and an interactive Shiny app.
+
+Classical foundations follow Hunt (1990) and Benincasa (2003), extended here to tidy longitudinal workflows.
+
+## Development Status
+
+Release candidate (`0.1.1`) prepared with CRAN-oriented structure.
+
+## Installation
+
+```r
+# install.packages("remotes")
+# remotes::install_github("example/phytogrowR")
+# or locally:
+# remotes::install_local(".")
+```
+
+## Minimal Example
+
+```r
+library(phytogrowR)
+
+dat <- prepare_growth_data(growth_wide_example)
+classic <- calc_classic_growth(dat, group_cols = c("treatment", "plot_id", "plant_id"), epsilon = 1e-6)
+head(classic)
+```
+
+## Main Functions
+
+- `check_growth_data()`
+- `prepare_growth_data()`
+- `calc_classic_growth()`
+- `fit_growth_curve()`
+- `calc_instant_rates()`
+- `bootstrap_growth()`
+- `compare_growth()`
+- `compare_growth_curves()` (formal test of coincidence of curves between
+  treatments: F test for nested models and likelihood ratio test)
+- `biomass_partition()`
+- `plot_growth_curve()`
+- `plot_growth_rates()`
+- `plot_partition()`
+- `growth_report()`
+- `run_phytogrow_app()`
+
+## Classical References
+
+- Hunt, R. (1990). *Basic Growth Analysis*. Unwin Hyman, London.
+- Benincasa, M. M. P. (2003). *Plant Growth Analysis: Basic Concepts*. FUNEP, Jaboticabal.
+
+## License
+
+MIT License.

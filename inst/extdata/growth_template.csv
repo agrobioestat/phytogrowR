@@ -1,0 +1,6 @@
+plant_id,plot_id,block,treatment,genotype,date,days_after_sowing,time,total_biomass_g,leaf_biomass_g,stem_biomass_g,root_biomass_g,reproductive_biomass_g,leaf_area_cm2,ground_area_m2
+P01_01,P01,B1,Control,G1,2024-01-16,15,15,1.30,0.67,0.32,0.29,0.02,128,0.25
+P01_01,P01,B1,Control,G1,2024-01-31,30,30,3.42,1.56,0.89,0.86,0.11,253,0.25
+P01_01,P01,B1,Control,G1,2024-02-15,45,45,8.10,3.08,2.21,2.35,0.46,524,0.25
+P01_01,P01,B1,Control,G1,2024-03-01,60,60,13.75,4.27,3.89,4.36,1.23,691,0.25
+P01_01,P01,B1,Control,G1,2024-03-16,75,75,18.94,4.96,5.47,6.22,2.09,774,0.25

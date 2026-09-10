@@ -1,0 +1,13 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.Rhistory$
+^\.RData$
+^README\.Rmd$
+^cran-comments\.md$
+^data-raw$
+^\.github$
+^LICENSE\.md$
+^phytogrowR\.Rcheck$
+^phytogrowR_.*\.tar\.gz$
+^revdep$
+^Rplots\.pdf$

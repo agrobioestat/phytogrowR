@@ -1,0 +1,6 @@
+plot_id,block,treatment,genotype,harvest,time,n_plants,total_biomass_g,leaf_biomass_g,stem_biomass_g,root_biomass_g,leaf_area_cm2,ground_area_m2
+P01,B1,Control,G1,1,15,6,1.35,0.68,0.34,0.31,126,0.25
+P01,B1,Control,G1,2,30,6,3.58,1.63,0.96,0.91,248,0.25
+P01,B1,Control,G1,3,45,6,7.94,3.05,2.18,2.29,506,0.25
+P01,B1,Control,G1,4,60,6,13.41,4.23,3.82,4.24,676,0.25
+P01,B1,Control,G1,5,75,6,18.61,4.87,5.42,6.13,756,0.25

@@ -1,0 +1,117 @@
+---
+title: "Classical Growth Analysis (Hunt et al., 2002)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Classical Growth Analysis (Hunt et al., 2002)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(phytogrowR)
+library(dplyr)
+```
+
+## 1. Introduction
+
+Classical plant growth analysis summarizes interval-average indices between
+successive harvests. In contrast, functional analysis fits curves and derives
+instantaneous rates. This vignette follows the practical recommendations from
+Hunt et al. (2002).
+
+## 2. Required data
+
+For the classical module, the main variables are:
+
+- total biomass
+- leaf biomass
+- root biomass
+- shoot biomass (or leaf + stem [+ reproductive biomass])
+- leaf area
+- harvest time
+
+## 3. Example dataset
+
+```{r}
+dplyr::glimpse(hunt_classical_example)
+```
+
+## 4. Classical calculation with `classical_growth_interval()`
+
+```{r}
+fit_classic <- classical_growth_interval(
+  data = hunt_classical_example,
+  time = time,
+  total_biomass = total_biomass_g,
+  leaf_biomass = leaf_biomass_g,
+  root_biomass = root_biomass_g,
+  stem_biomass = stem_biomass_g,
+  reproductive_biomass = reproductive_biomass_g,
+  leaf_area = leaf_area_cm2,
+  group_by = treatment,
+  ci_method = "both",
+  n_boot = 199,
+  seed = 123
+)
+
+print(fit_classic)
+```
+
+```{r}
+summary(fit_classic)
+```
+
+```{r}
+head(tidy(fit_classic))
+```
+
+## 5. Interpretation of indices
+
+- `RGR`: interval mean relative growth.
+- `ULR/NAR`: interval mean assimilation per unit leaf area (operationally equivalent here).
+- `SLA`: area per unit leaf biomass.
+- `LWF/LWR`: leaf biomass fraction (synonyms in this module).
+- `LAR`: area per unit total biomass, with decomposition `LAR = SLA * LWF`.
+- `root_shoot_ratio`: root allocation relative to shoot.
+- `root_shoot_allometric_coefficient`: slope (`beta`) from `log(root) ~ log(shoot)`.
+
+## 6. Treatment comparison
+
+```{r}
+fit_treatment <- tidy(fit_classic) %>%
+  filter(index %in% c("rgr", "ulr", "sla", "lar")) %>%
+  arrange(index, treatment)
+
+fit_treatment
+```
+
+## 7. Graphics
+
+```{r}
+plot(fit_classic, metric = "rgr")
+```
+
+```{r}
+plot(fit_classic, metric = "ulr")
+```
+
+```{r}
+plot_allometry(
+  data = hunt_classical_example,
+  shoot_biomass = "shoot_biomass_g",
+  root_biomass = "root_biomass_g",
+  treatment = "treatment"
+)
+```
+
+## 8. Limitations
+
+- Classical indices are interval means, not instantaneous rates.
+- Exactly two harvests are required per interval.
+- Log-based indices require strictly positive biomass and leaf area.
+- When many harvests are available, functional analysis may be preferable.
+
+## 9. References
+
+Hunt, R., Causton, D. R., Shipley, B., & Askew, A. P. (2002). A modern tool for classical plant growth analysis. *Annals of Botany*, 90(4), 485-488. doi:10.1093/aob/mcf214
