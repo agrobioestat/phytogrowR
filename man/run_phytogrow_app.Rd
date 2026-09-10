@@ -23,7 +23,7 @@ core of \code{phytogrowR} installs without them. The availability of every
 optional package is verified here, before the app directory is handed to
 \code{\link[shiny:runApp]{shiny::runApp()}}.
 
-The interface is organised as a Bootstrap 5 dashboard: a collapsible
+The interface is organized as a Bootstrap 5 dashboard: a collapsible
 sidebar for the controls, a row of summary boxes for the design, and one
 card-based tab per analysis module. Five in-package example datasets are
 available from the sidebar, so every module can be exercised without any

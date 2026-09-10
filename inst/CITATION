@@ -1,7 +1,17 @@
-citHeader("To cite phytogrowR classical interval methods, use:")
+citHeader("To cite phytogrowR in publications, use the first entry. The remaining entries are the primary sources for the methods the package implements.")
+
+bibentry(
+  bibtype = "Manual",
+  title = "phytogrowR: Modern Growth Analysis for Plant Biomass and Leaf Area Data",
+  author = person("Joao Everthon da Silva", "Ribeiro"),
+  year = "2026",
+  note = sprintf("R package version %s", meta$Version),
+  url = "https://github.com/agrobioestat/phytogrowR"
+)
 
 bibentry(
   bibtype = "Article",
+  header = "For the classical two-harvest interval methods:",
   title = "A modern tool for classical plant growth analysis",
   author = c(
     person("R.", "Hunt"),
@@ -15,4 +25,33 @@ bibentry(
   number = "4",
   pages = "485--488",
   doi = "10.1093/aob/mcf214"
+)
+
+bibentry(
+  bibtype = "Article",
+  header = "For the interval formulae and their assumptions:",
+  title = "Growth analysis formulae: their use and abuse",
+  author = person("P. J.", "Radford"),
+  journal = "Crop Science",
+  year = "1967",
+  volume = "7",
+  number = "3",
+  pages = "171--175",
+  doi = "10.2135/cropsci1967.0011183X000700030001x"
+)
+
+bibentry(
+  bibtype = "Article",
+  header = "For experimental design and computational recommendations:",
+  title = "Plant growth analysis: an evaluation of experimental design and computational methods",
+  author = c(
+    person("H.", "Poorter"),
+    person("E.", "Garnier")
+  ),
+  journal = "Journal of Experimental Botany",
+  year = "1996",
+  volume = "47",
+  number = "9",
+  pages = "1343--1351",
+  doi = "10.1093/jxb/47.9.1343"
 )

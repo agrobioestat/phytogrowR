@@ -85,7 +85,7 @@ ct <- compare_growth_curves(
 ct
 ```
 
-The `plot()` method makes the quantity being tested visible: the coloured lines
+The `plot()` method makes the quantity being tested visible: the colored lines
 are the treatment-specific curves and the dashed black line is the single common
 curve imposed by H0.
 

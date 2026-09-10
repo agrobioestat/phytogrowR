@@ -1,11 +1,18 @@
+
 # phytogrowR
 
-> **Phyto** + **Grow** + **R**  
-> *Modern plant growth analysis for longitudinal and harvest data.*
+> **Phyto** + **Grow** + **R** *Modern plant growth analysis for
+> longitudinal and harvest data.*
 
-`phytogrowR` is an R package focused on modern growth analysis in plant physiology and agronomic experiments. It supports repeated measurements, destructive sequential harvests, smooth growth modeling, derivative-based rates, bootstrap uncertainty, treatment comparison, biomass partitioning, automatic reports, and an interactive Shiny app.
+`phytogrowR` is an R package focused on modern growth analysis in plant
+physiology and agronomic experiments. It supports repeated measurements,
+destructive sequential harvests, smooth growth modeling,
+derivative-based rates, bootstrap uncertainty, treatment comparison,
+biomass partitioning, automatic reports, and an interactive Shiny app.
 
-Classical foundations follow Hunt (1990) and Benincasa (2003), extended here to tidy longitudinal workflows.
+Classical foundations follow Radford (1967), Poorter & Garnier (1996)
+and Hunt, Causton, Shipley & Askew (2002), extended here to tidy
+longitudinal workflows.
 
 ## Development Status
 
@@ -13,16 +20,29 @@ Release candidate (`0.1.1`) prepared with CRAN-oriented structure.
 
 ## Installation
 
-```r
+``` r
 # install.packages("remotes")
-# remotes::install_github("example/phytogrowR")
+# remotes::install_github("agrobioestat/phytogrowR")
 # or locally:
 # remotes::install_local(".")
 ```
 
+The analytical core depends only on `stats`, `utils`, `graphics`,
+`dplyr`, `generics`, `ggplot2`, `mgcv`, `rlang`, `tibble` and `tidyr`.
+The interactive app, the report writer and the `tidy()` helpers use
+packages listed in `Suggests`, which are checked at run time:
+
+``` r
+# only needed for run_phytogrow_app()
+install.packages(c("shiny", "bslib", "DT", "readr"))
+
+# only needed for growth_report()
+install.packages(c("rmarkdown", "knitr"))
+```
+
 ## Minimal Example
 
-```r
+``` r
 library(phytogrowR)
 
 dat <- prepare_growth_data(growth_wide_example)
@@ -32,7 +52,7 @@ head(classic)
 
 ## Full Example
 
-```r
+``` r
 library(phytogrowR)
 library(dplyr)
 
@@ -58,7 +78,7 @@ plot_partition(part, facet_var = "treatment")
 
 ## Classical growth analysis
 
-```r
+``` r
 library(phytogrowR)
 
 fit_classic <- classical_growth_interval(
@@ -80,44 +100,90 @@ tidy(fit_classic)
 plot(fit_classic)
 ```
 
+## Comparing whole curves between treatments
+
+`compare_growth()` contrasts one index at a time. When the question is
+whether the treatments follow *the same growth trajectory*, the
+comparison belongs between whole curves, which is a nested-model
+problem:
+
+- **H0 (reduced)** — one single curve describes every treatment;
+- **H1 (full)** — every treatment keeps its own curve.
+
+`compare_growth_curves()` fits both and compares them with the F test
+for nested models (exact under normality for the polynomial family) and
+with the likelihood ratio test:
+
+``` r
+dat <- prepare_growth_data(growth_wide_example)
+
+ct <- compare_growth_curves(
+  dat,
+  response = "total_biomass_g",
+  group_var = "treatment",
+  model = "poly",       # or "exponential", "logistic", "gompertz", "richards"
+  degree = 2,
+  log_response = TRUE,  # ln(W): the derivative of the curve is the RGR
+  epsilon = 1e-6,
+  pairwise = TRUE
+)
+
+ct          # verdict, statistics and the level / shape decomposition
+tidy(ct)
+plot(ct)    # treatment curves against the single common curve under H0
+```
+
+For the non-linear families the output additionally reports one
+hypothesis per parameter, which says *why* the curves differ: final size
+(`Asym`), timing (`xmid`, `b`) or rate (`scal`, `c`, `k`, `r`).
+
+## Interactive app
+
+``` r
+phytogrowR::run_phytogrow_app()
+```
+
+Five in-package example datasets are available from the sidebar, so
+every module can be explored without any external file: repeated
+measurements, destructive harvest means, the two-harvest classical
+design of Hunt et al. (2002), a long tidy table, and a small quick
+subset.
+
 ## Main Functions
 
 - `check_growth_data()`
 - `prepare_growth_data()`
 - `calc_classic_growth()`
+- `classical_growth_interval()`
 - `fit_growth_curve()`
 - `calc_instant_rates()`
 - `bootstrap_growth()`
 - `compare_growth()`
-- `compare_growth_curves()` (formal test of coincidence of curves between
-  treatments: F test for nested models and likelihood ratio test)
+- `compare_growth_curves()` (formal test of coincidence of curves
+  between treatments: F test for nested models and likelihood ratio
+  test)
 - `biomass_partition()`
+- `calc_root_shoot_allometry()`
 - `plot_growth_curve()`
 - `plot_growth_rates()`
 - `plot_partition()`
+- `plot_allometry()`
 - `growth_report()`
 - `run_phytogrow_app()`
 
 ## Classical References
 
+- Radford, P. J. (1967). Growth analysis formulae: their use and abuse.
+  *Crop Science*, 7(3), 171-175.
 - Hunt, R. (1990). *Basic Growth Analysis*. Unwin Hyman, London.
-- Benincasa, M. M. P. (2003). *Plant Growth Analysis: Basic Concepts*. FUNEP, Jaboticabal.
-
-## Key Differentials
-
-- Built for longitudinal and destructive-harvest growth analysis.
-- Supports multiple treatments, genotypes, blocks, plots, and plants.
-- Flexible curve fitting (`spline`, `gam`, `loess`, `nls` variants).
-- Instantaneous rates from fitted curve derivatives.
-- Bootstrap CI by row, plant, or plot (with stratification).
-- Tidy outputs and publication-ready graphics.
-- Interactive Shiny app and automated report export.
-
-## Suggested Citation
-
-```text
-Ribeiro, J. E. S. (2026). phytogrowR: Modern Growth Analysis for Plant Biomass and Leaf Area Data. R package version 0.1.1.
-```
+- Poorter, H., & Garnier, E. (1996). Plant growth analysis: an
+  evaluation of experimental design and computational methods. *Journal
+  of Experimental Botany*, 47(9), 1343-1351.
+- Benincasa, M. M. P. (2003). *Plant Growth Analysis: Basic Concepts*.
+  FUNEP, Jaboticabal.
+- Hunt, R., Causton, D. R., Shipley, B., & Askew, A. P. (2002). A modern
+  tool for classical plant growth analysis. *Annals of Botany*, 90(4),
+  485-488.
 
 ## License
 

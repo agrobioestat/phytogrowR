@@ -53,7 +53,7 @@ treatments.}
 \item{p_adjust_method}{Multiplicity adjustment applied to the pairwise
 p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}.}
 
-\item{center_time}{Logical; centre time at its mean before fitting the
+\item{center_time}{Logical; center time at its mean before fitting the
 polynomial. This improves the conditioning of the design matrix and changes
 neither the fitted values nor any test statistic, only the meaning of the
 intercept.}
